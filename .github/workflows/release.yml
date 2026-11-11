@@ -1,0 +1,56 @@
+name: Сборка и релиз
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Сборка (один exe, .NET внутри)
+        run: >
+          dotnet publish ETS2TwitchBot.csproj -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -o out
+
+      - name: Автопроверки
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath out\ETS2TwitchBot.exe -ArgumentList '--selftest' -Wait -PassThru
+          if (Test-Path out\selftest_log.txt) { Get-Content out\selftest_log.txt }
+          if ($p.ExitCode -ne 0) { throw "Автопроверки не пройдены (код $($p.ExitCode))" }
+
+      - name: Упаковка
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          if (Test-Path out\ETS2TwitchBot.exe) { Copy-Item out\ETS2TwitchBot.exe dist\ETS2_Twitch_Bot_Setup.exe }
+          Copy-Item README_RU.txt dist\README_RU.txt
+          if (Test-Path out\selftest_log.txt) { Copy-Item out\selftest_log.txt dist\selftest_log.txt }
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ETS2_Twitch_Bot
+          path: dist
+
+      - name: Релиз на GitHub
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/ETS2_Twitch_Bot_Setup.exe
+            dist/README_RU.txt
+          generate_release_notes: true
