@@ -1,0 +1,16 @@
+bin/
+obj/
+out_full/
+shots/
+*.log
+build_log*.txt
+selftest_result.txt
+# личные данные и ключи — никогда не коммитить
+settings.json
+settings.json.*
+twitch_tokens.json
+da_tokens.json
+stats.json
+piggy.json
+reports/
+last_action.txt

@@ -1,0 +1,122 @@
+<Window x:Class="EtsBot.WizardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Мастер настройки ETS2 Twitch Bot" Width="660" Height="620"
+        WindowStartupLocation="CenterOwner" WindowStyle="None" ResizeMode="NoResize"
+        Background="{StaticResource BgBrush}" Foreground="{StaticResource TextBrush}" FontFamily="Segoe UI"
+        UseLayoutRounding="True" TextOptions.TextFormattingMode="Display">
+    <Border BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Background="#0A0B10" MouseLeftButtonDown="Header_MouseDown">
+                <TextBlock Text="Мастер настройки" FontSize="12" Foreground="{StaticResource MutedBrush}"
+                           VerticalAlignment="Center" Margin="16,0,0,0"/>
+                <Button HorizontalAlignment="Right" Style="{StaticResource CloseButton}" Content="&#x2715;" FontSize="12" Click="Close_Click"/>
+            </Grid>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <Grid Margin="34,22,34,10">
+
+                    <!-- 0. Приветствие -->
+                    <StackPanel x:Name="Step0">
+                        <TextBlock Text="Добро пожаловать!" Style="{StaticResource H2}" FontSize="24"/>
+                        <TextBlock Style="{StaticResource Muted}" Margin="0,10,0,0" LineHeight="20" TextWrapping="Wrap"
+                                   Text="За несколько шагов мы подключим Twitch, создадим награды за баллы и проверим клавиши игры. Это займёт около пяти минут. DonationAlerts подключать необязательно — шаг можно пропустить."/>
+                        <TextBlock Style="{StaticResource Muted}" Margin="0,16,0,0" LineHeight="20" TextWrapping="Wrap"
+                                   Text="Что понадобится: аккаунт Twitch и браузер. Права администратора не нужны."/>
+                    </StackPanel>
+
+                    <!-- 1. Twitch -->
+                    <StackPanel x:Name="Step1" Visibility="Collapsed">
+                        <TextBlock Text="Шаг 1. Приложение Twitch" Style="{StaticResource H2}"/>
+                        <TextBlock Style="{StaticResource Muted}" Margin="0,8,0,0" LineHeight="20" TextWrapping="Wrap"
+                                   Text="1) Нажми «Открыть консоль Twitch», войди и выбери «Зарегистрировать ваше приложение».&#10;2) Название любое. В «OAuth Redirect URLs» вставь адрес ниже. Категория — Application Integration, тип клиента — Confidential.&#10;3) Скопируй Client ID, нажми «New Secret» и скопируй Client Secret. Впиши их сюда."/>
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <Button Content="Открыть консоль Twitch" Click="OpenTwitch_Click" Margin="0,0,10,0"/>
+                            <Button Content="Скопировать адрес Redirect URL" Click="CopyRedirect_Click"/>
+                        </StackPanel>
+                        <TextBlock Text="Redirect URL (впиши в консоль Twitch ровно такой)" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Text="{Binding Twitch.RedirectUri, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="Client ID" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Text="{Binding Twitch.ClientId, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="Client Secret" Style="{StaticResource FieldLabel}"/>
+                        <PasswordBox x:Name="TwSecret" PasswordChanged="TwSecret_PasswordChanged"/>
+                    </StackPanel>
+
+                    <!-- 2. Награды -->
+                    <StackPanel x:Name="Step2" Visibility="Collapsed">
+                        <TextBlock Text="Шаг 2. Награды на канале" Style="{StaticResource H2}"/>
+                        <TextBlock Style="{StaticResource Muted}" Margin="0,8,0,0" LineHeight="20" TextWrapping="Wrap"
+                                   Text="Нажми кнопку: откроется браузер, нажми там «Авторизовать». Программа создаст на твоём канале награды за баллы (руль, тормоз, гудок и другие). Цены и список потом меняются во вкладке «Награды». Этот шаг можно сделать позже."/>
+                        <Button x:Name="CreateBtn" Content="Войти в Twitch и создать награды" Style="{StaticResource PrimaryButton}"
+                                Click="CreateRewards_Click" HorizontalAlignment="Left" Margin="0,16,0,0" Height="42"/>
+                        <TextBlock x:Name="RewardsStatus" Margin="0,12,0,0" TextWrapping="Wrap" FontSize="13"/>
+                    </StackPanel>
+
+                    <!-- 3. Донаты -->
+                    <StackPanel x:Name="Step3" Visibility="Collapsed">
+                        <TextBlock Text="Шаг 3. DonationAlerts (необязательно)" Style="{StaticResource H2}"/>
+                        <TextBlock Style="{StaticResource Muted}" Margin="0,8,0,0" LineHeight="20" TextWrapping="Wrap"
+                                   Text="Если хочешь, чтобы донаты тоже запускали действия: открой donationalerts.com → Разработчикам, создай приложение, Redirect URI впиши ровно как ниже, права oauth-user-show и oauth-donation-subscribe. Если нет — просто нажми «Далее»."/>
+                        <CheckBox Content="Управлять игрой донатами" IsChecked="{Binding Donations.Enabled}" Margin="0,12,0,0"/>
+                        <Button Content="Открыть настройки приложений DA" Click="OpenDa_Click" HorizontalAlignment="Left" Margin="0,10,0,0"/>
+                        <TextBlock Text="Redirect URI" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Text="{Binding Donations.RedirectUri, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="Client ID" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Text="{Binding Donations.ClientId, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="Client Secret" Style="{StaticResource FieldLabel}"/>
+                        <PasswordBox x:Name="DaSecret" PasswordChanged="DaSecret_PasswordChanged"/>
+                    </StackPanel>
+
+                    <!-- 4. Клавиши -->
+                    <StackPanel x:Name="Step4" Visibility="Collapsed">
+                        <TextBlock Text="Шаг 4. Клавиши игры" Style="{StaticResource H2}"/>
+                        <TextBlock Style="{StaticResource Muted}" Margin="0,8,0,10" LineHeight="20" TextWrapping="Wrap"
+                                   Text="Впиши клавиши, которые назначены в настройках ETS2 (a, w, space, f5, [ …). Если ты не менял управление, оставь как есть. Остальные клавиши можно поправить потом во вкладке «Настройки»."/>
+                        <ItemsControl x:Name="KeyList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="220"/>
+                                            <ColumnDefinition Width="110"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Label}" VerticalAlignment="Center"/>
+                                        <TextBox Grid.Column="1" Text="{Binding Key, UpdateSourceTrigger=LostFocus}" Padding="8,6"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <!-- 5. Проверка -->
+                    <StackPanel x:Name="Step5" Visibility="Collapsed">
+                        <TextBlock Text="Шаг 5. Проверка" Style="{StaticResource H2}"/>
+                        <TextBlock Style="{StaticResource Muted}" Margin="0,8,0,0" LineHeight="20" TextWrapping="Wrap"
+                                   Text="Запусти ETS2, сядь в машину и нажми кнопку ниже: через 3 секунды машина дважды посигналит. Если гудок прозвучал, клавиши настроены верно."/>
+                        <Button Content="▶  Проверить гудок" Click="TestHorn_Click" HorizontalAlignment="Left" Margin="0,14,0,0" Height="40"/>
+                        <TextBlock x:Name="TestStatus" Margin="0,10,0,0" TextWrapping="Wrap" FontSize="13"/>
+                        <CheckBox x:Name="StartCheck" Content="Запустить бота сразу после мастера" IsChecked="True" Margin="0,18,0,0"/>
+                        <TextBlock Style="{StaticResource Muted}" Margin="0,12,0,0" LineHeight="20" TextWrapping="Wrap"
+                                   Text="Готово! Мастер можно открыть снова во вкладке «Настройки» → «Сервис»."/>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+
+            <Grid Grid.Row="2" Margin="34,8,34,20">
+                <TextBlock x:Name="StepLabel" Style="{StaticResource Muted}" VerticalAlignment="Center"/>
+                <TextBlock x:Name="Hint" Foreground="{StaticResource RedBrush}" FontSize="12" Margin="110,0,230,0"
+                           VerticalAlignment="Center" TextWrapping="Wrap"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="BackBtn" Content="Назад" Click="Back_Click" Margin="0,0,10,0" Height="40" MinWidth="90"/>
+                    <Button x:Name="NextBtn" Content="Далее" Style="{StaticResource PrimaryButton}" Click="Next_Click" Height="40" MinWidth="120"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

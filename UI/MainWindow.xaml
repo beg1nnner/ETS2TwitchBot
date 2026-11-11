@@ -1,0 +1,904 @@
+<Window x:Class="EtsBot.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ETS2 Twitch Bot" Width="1120" Height="740" MinWidth="960" MinHeight="640"
+        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="CanResize"
+        Background="{StaticResource BgBrush}" Foreground="{StaticResource TextBrush}" FontFamily="Segoe UI" UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="40" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Border x:Name="RootBorder" Background="{StaticResource BgBrush}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+
+            <!-- ===== Заголовок окна ===== -->
+            <Grid Grid.Row="0" Background="#0A0B10">
+                <StackPanel Orientation="Horizontal" Margin="14,0,0,0" VerticalAlignment="Center">
+                    <Image x:Name="TitleIcon" Width="18" Height="18" Margin="0,0,10,0"/>
+                    <TextBlock Text="ETS2 Twitch Bot" FontSize="12" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button WindowChrome.IsHitTestVisibleInChrome="True" Style="{StaticResource TitleButton}" Click="TitleMin_Click" Content="&#x2014;" FontSize="13"/>
+                    <Button WindowChrome.IsHitTestVisibleInChrome="True" Style="{StaticResource CloseButton}" Click="TitleClose_Click" Content="&#x2715;" FontSize="12"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- ===== Основная область ===== -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Боковая панель -->
+                <Border Grid.Column="0" Background="#0F1017" BorderBrush="{StaticResource BorderBrush2}" BorderThickness="0,0,1,0">
+                    <Grid Margin="14,18,14,14">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="6,0,0,24">
+                            <Border Width="36" Height="36" CornerRadius="10" Background="{StaticResource AccentGradient}">
+                                <TextBlock Text="E" FontSize="20" FontWeight="Bold" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="ETS2 Bot" FontSize="15" FontWeight="SemiBold"/>
+                                <TextBlock Text="Twitch + Донаты" Style="{StaticResource Muted}" FontSize="11"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1">
+                            <RadioButton x:Name="NavHome" Style="{StaticResource NavButton}" GroupName="nav" IsChecked="True" Tag="Home" Checked="Nav_Checked" Content="Главная"/>
+                            <RadioButton x:Name="NavRewards" Style="{StaticResource NavButton}" GroupName="nav" Tag="Rewards" Checked="Nav_Checked" Content="Награды"/>
+                            <RadioButton x:Name="NavDonations" Style="{StaticResource NavButton}" GroupName="nav" Tag="Donations" Checked="Nav_Checked" Content="Донаты"/>
+                            <RadioButton x:Name="NavSettings" Style="{StaticResource NavButton}" GroupName="nav" Tag="Settings" Checked="Nav_Checked" Content="Настройки"/>
+                            <RadioButton x:Name="NavLog" Style="{StaticResource NavButton}" GroupName="nav" Tag="Log" Checked="Nav_Checked" Content="Журнал"/>
+                        </StackPanel>
+                        <TextBlock Grid.Row="2" x:Name="VersionText" Style="{StaticResource Muted}" Margin="8,0,0,0" FontSize="11"/>
+                    </Grid>
+                </Border>
+
+                <!-- Страницы -->
+                <Grid Grid.Column="1">
+
+                    <!-- ============ ГЛАВНАЯ ============ -->
+                    <Grid x:Name="PageHome" Margin="30,26,30,20">
+                        <Grid.RenderTransform><TranslateTransform/></Grid.RenderTransform>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Margin="0,0,0,18">
+                            <TextBlock Text="Главная" Style="{StaticResource H1}"/>
+                            <TextBlock Text="Зрители покупают награды — в игре происходят действия" Style="{StaticResource Muted}" Margin="0,4,0,0"/>
+                        </StackPanel>
+
+                        <!-- Статусы -->
+                        <Grid Grid.Row="1" Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Style="{StaticResource Card}" Padding="16">
+                                <StackPanel Orientation="Horizontal">
+                                    <Grid Width="28" Height="28" VerticalAlignment="Top" Margin="0,2,14,0">
+                                        <Ellipse x:Name="TwHalo" Width="12" Height="12" Fill="#8A90A8" Opacity="0"/>
+                                        <Ellipse x:Name="TwDot" Width="12" Height="12" Fill="#8A90A8"/>
+                                    </Grid>
+                                    <StackPanel Width="190">
+                                        <TextBlock Text="Twitch" Style="{StaticResource Muted}"/>
+                                        <TextBlock x:Name="TwState" Text="Не подключено" FontSize="16" FontWeight="SemiBold"/>
+                                        <TextBlock x:Name="TwDetail" Style="{StaticResource Muted}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis" MaxHeight="34"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Style="{StaticResource Card}" Padding="16">
+                                <StackPanel Orientation="Horizontal">
+                                    <Grid Width="28" Height="28" VerticalAlignment="Top" Margin="0,2,14,0">
+                                        <Ellipse x:Name="DaHalo" Width="12" Height="12" Fill="#8A90A8" Opacity="0"/>
+                                        <Ellipse x:Name="DaDot" Width="12" Height="12" Fill="#8A90A8"/>
+                                    </Grid>
+                                    <StackPanel Width="190">
+                                        <TextBlock Text="DonationAlerts" Style="{StaticResource Muted}"/>
+                                        <TextBlock x:Name="DaState" Text="Выключено" FontSize="16" FontWeight="SemiBold"/>
+                                        <TextBlock x:Name="DaDetail" Style="{StaticResource Muted}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis" MaxHeight="34"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="4" Style="{StaticResource Card}" Padding="16">
+                                <StackPanel Orientation="Horizontal">
+                                    <Grid Width="28" Height="28" VerticalAlignment="Top" Margin="0,2,14,0">
+                                        <Ellipse x:Name="GameHalo" Width="12" Height="12" Fill="#8A90A8" Opacity="0"/>
+                                        <Ellipse x:Name="GameDot" Width="12" Height="12" Fill="#8A90A8"/>
+                                    </Grid>
+                                    <StackPanel Width="190">
+                                        <TextBlock Text="Игра" Style="{StaticResource Muted}"/>
+                                        <TextBlock x:Name="GameState" Text="—" FontSize="16" FontWeight="SemiBold"/>
+                                        <TextBlock x:Name="GameDetail" Style="{StaticResource Muted}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis" MaxHeight="34"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <!-- Управление -->
+                        <Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,0,0,16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="StartBtn" Grid.Column="0" Style="{StaticResource PrimaryButton}" Click="StartStop_Click"
+                                        Width="210" Height="52" FontSize="16">
+                                    <Button.Effect>
+                                        <DropShadowEffect x:Name="StartGlow" Color="#7C5CFF" BlurRadius="14" ShadowDepth="0" Opacity="0.75"/>
+                                    </Button.Effect>
+                                    <TextBlock x:Name="StartText" Text="▶  Запустить" Foreground="White" FontWeight="SemiBold"/>
+                                </Button>
+                                <StackPanel Grid.Column="1" Margin="22,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="RunHint" Text="Нажми «Запустить», затем переключись в игру." FontSize="13"/>
+                                    <TextBlock Text="Режим «Тест без игры» и другие опции — во вкладке «Настройки»." Style="{StaticResource Muted}" Margin="0,4,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Content="Создать награды на Twitch" Click="CreateRewards_Click" Margin="0,0,10,0" Height="40"/>
+                                    <Button Content="■ Аварийный стоп" Style="{StaticResource DangerButton}" Click="EmergencyStop_Click" Height="40"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Сейчас / Очередь -->
+                        <Grid Grid.Row="3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Style="{StaticResource Card}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="Выполняется сейчас" Style="{StaticResource H2}"/>
+                                    <Grid Grid.Row="1">
+                                        <TextBlock x:Name="CurIdle" Text="Ожидаю награды и донаты…" Style="{StaticResource Muted}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"/>
+                                        <StackPanel x:Name="CurPanel" VerticalAlignment="Center" Visibility="Collapsed">
+                                            <TextBlock x:Name="CurTitle" FontSize="22" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock x:Name="CurUser" Style="{StaticResource Muted}" Margin="0,4,0,16" FontSize="13"/>
+                                            <Border Height="10" CornerRadius="5" Background="{StaticResource Surface3Brush}" ClipToBounds="True">
+                                                <Border x:Name="ProgressFill" CornerRadius="5" Background="{StaticResource AccentGradient}"
+                                                        RenderTransformOrigin="0,0.5">
+                                                    <Border.RenderTransform><ScaleTransform x:Name="ProgressScale" ScaleX="0"/></Border.RenderTransform>
+                                                </Border>
+                                            </Border>
+                                            <TextBlock x:Name="CurTime" Style="{StaticResource Muted}" Margin="0,8,0,0"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <Border Grid.Column="2" Style="{StaticResource Card}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock x:Name="QueueTitle" Text="Очередь" Style="{StaticResource H2}"/>
+                                    <TextBlock x:Name="QueueEmpty" Grid.Row="1" Text="Очередь пуста" Style="{StaticResource Muted}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"/>
+                                    <ListBox x:Name="QueueList" Grid.Row="1" Margin="0,10,0,0">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Display}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding User}" Style="{StaticResource Muted}"/>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="1" Text="{Binding SourceText}" Style="{StaticResource Muted}" VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+
+                    <!-- ============ НАГРАДЫ ============ -->
+                    <Grid x:Name="PageRewards" Margin="30,26,30,20" Visibility="Collapsed">
+                        <Grid.RenderTransform><TranslateTransform/></Grid.RenderTransform>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="Награды" Style="{StaticResource H1}"/>
+                                <TextBlock Text="Что происходит в игре, когда зритель покупает награду за баллы канала" Style="{StaticResource Muted}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Button Content="Обновить цены на Twitch" Click="UpdateRewards_Click" Margin="0,0,10,0"/>
+                                <Button Content="Создать награды на Twitch" Click="CreateRewards_Click"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="290"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Style="{StaticResource Card}" Padding="12">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <ListBox x:Name="RewardList" SelectionChanged="RewardList_SelectionChanged">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Style="{StaticResource Muted}">
+                                                            <Run Text="{Binding Cost, Mode=OneWay}"/><Run Text=" баллов"/>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                    <Ellipse x:Name="Dot" Grid.Column="1" Width="9" Height="9" Fill="{StaticResource GreenBrush}"/>
+                                                </Grid>
+                                                <DataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding Enabled}" Value="False">
+                                                        <Setter TargetName="Dot" Property="Fill" Value="{StaticResource MutedBrush}"/>
+                                                    </DataTrigger>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <Button Grid.Row="1" Content="＋  Добавить награду" Margin="0,10,0,0" Click="AddReward_Click"/>
+                                </Grid>
+                            </Border>
+
+                            <Grid Grid.Column="2">
+                                <TextBlock x:Name="RewardEmpty" Text="Выбери награду слева или добавь новую" Style="{StaticResource Muted}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"/>
+                                <ScrollViewer x:Name="RewardEditor" VerticalScrollBarVisibility="Auto" Visibility="Collapsed"
+                                              DataContext="{Binding SelectedItem, ElementName=RewardList}">
+                                    <Border Style="{StaticResource Card}">
+                                        <StackPanel>
+                                            <TextBlock Text="Название на Twitch" Style="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="14"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="14"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Цена (баллов)" Style="{StaticResource FieldLabel}"/>
+                                                    <TextBox Text="{Binding Cost, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="Перезарядка (сек)" Style="{StaticResource FieldLabel}"/>
+                                                    <TextBox Text="{Binding Cooldown, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="4">
+                                                    <TextBlock Text="Цвет (#RRGGBB)" Style="{StaticResource FieldLabel}"/>
+                                                    <TextBox Text="{Binding Color, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                            <TextBlock Text="Описание для зрителей" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding Prompt, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <CheckBox Content="Награда включена" IsChecked="{Binding Enabled}" Margin="0,14,0,0"/>
+                                            <CheckBox Content="Может выпасть в рулетке и попасть в голосование чата" IsChecked="{Binding InRoulette}"/>
+                                            <TextBlock Text="Дорожает после каждой покупки на (баллов, 0 — цена не меняется)" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding PriceStep, UpdateSourceTrigger=PropertyChanged}" Width="140" HorizontalAlignment="Left"/>
+
+                                            <TextBlock Text="Действие в игре" Style="{StaticResource FieldLabel}" Margin="0,12,0,4"/>
+                                            <TextBox x:Name="RewardSteps" Text="{Binding Steps, UpdateSourceTrigger=PropertyChanged}"
+                                                     AcceptsReturn="True" AcceptsTab="False" TextWrapping="NoWrap" MinHeight="130"
+                                                     FontFamily="Consolas" FontSize="13" VerticalScrollBarVisibility="Auto"
+                                                     TextChanged="RewardSteps_TextChanged"/>
+                                            <TextBlock x:Name="RewardStepsInfo" Margin="0,8,0,0" FontSize="12"/>
+
+                                            <Border Background="{StaticResource Surface2Brush}" CornerRadius="9" Padding="14,10" Margin="0,14,0,0">
+                                                <TextBlock Style="{StaticResource Muted}" LineHeight="19" FontFamily="Consolas" TextWrapping="NoWrap"
+                                                           Text="hold steer_left 1.5   — зажать клавишу на 1.5 сек&#10;press horn 3 0.25     — нажать 3 раза, пауза 0.25 сек&#10;wait 0.5              — пауза&#10;scroll up 10          — колёсико мыши вверх (down — вниз)&#10;repeat 4 ... end      — повторить блок 4 раза&#10;# после решётки — комментарий"/>
+                                            </Border>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                                                <Button Content="▶  Проверить" Style="{StaticResource PrimaryButton}" Click="TestReward_Click" Margin="0,0,10,0"/>
+                                                <Button Content="Копия" Click="DuplicateReward_Click" Margin="0,0,10,0"/>
+                                                <Button Content="Удалить" Click="DeleteReward_Click"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </ScrollViewer>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+
+                    <!-- ============ ДОНАТЫ ============ -->
+                    <Grid x:Name="PageDonations" Margin="30,26,30,20" Visibility="Collapsed">
+                        <Grid.RenderTransform><TranslateTransform/></Grid.RenderTransform>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="Донаты" Style="{StaticResource H1}"/>
+                                <TextBlock Text="Правила проверяются сверху вниз — срабатывает первое подходящее" Style="{StaticResource Muted}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <CheckBox Content="Донаты включены" IsChecked="{Binding Enabled}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="290"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Style="{StaticResource Card}" Padding="12">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <ListBox x:Name="RuleList" SelectionChanged="RuleList_SelectionChanged">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding Keywords}" Style="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>
+                                                    </StackPanel>
+                                                    <Ellipse x:Name="Dot" Grid.Column="1" Width="9" Height="9" Fill="{StaticResource GreenBrush}"/>
+                                                </Grid>
+                                                <DataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding Enabled}" Value="False">
+                                                        <Setter TargetName="Dot" Property="Fill" Value="{StaticResource MutedBrush}"/>
+                                                    </DataTrigger>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <StackPanel Grid.Row="1" Margin="0,10,0,0">
+                                        <Button Content="＋  Добавить правило" Click="AddRule_Click"/>
+                                        <Grid Margin="0,8,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Content="▲ Выше" Padding="8,7" Click="MoveRuleUp_Click"/>
+                                            <Button Grid.Column="2" Content="▼ Ниже" Padding="8,7" Click="MoveRuleDown_Click"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock x:Name="RuleEmpty" Text="Выбери правило слева или добавь новое" Style="{StaticResource Muted}"
+                                               HorizontalAlignment="Center" Margin="0,30,0,30" FontSize="13"/>
+                                    <Border x:Name="RuleEditor" Style="{StaticResource Card}" Visibility="Collapsed" Margin="0,0,0,14"
+                                            DataContext="{Binding SelectedItem, ElementName=RuleList}">
+                                        <StackPanel>
+                                            <TextBlock Text="Название правила" Style="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBlock Text="Ключевые слова в сообщении (через запятую; пусто — любое сообщение)" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding Keywords, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="14"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="14"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="14"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Сумма от" Style="{StaticResource FieldLabel}"/>
+                                                    <TextBox Text="{Binding MinAmount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="Сумма до" Style="{StaticResource FieldLabel}"/>
+                                                    <TextBox Text="{Binding MaxAmount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="4">
+                                                    <TextBlock Text="Повтор каждые N ₽" Style="{StaticResource FieldLabel}"/>
+                                                    <TextBox Text="{Binding PerAmount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="6">
+                                                    <TextBlock Text="Не больше раз" Style="{StaticResource FieldLabel}"/>
+                                                    <TextBox Text="{Binding MaxTimes, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                            <CheckBox Content="Правило включено" IsChecked="{Binding Enabled}" Margin="0,14,0,0"/>
+                                            <CheckBox Content="Показывать в оверлее для OBS" IsChecked="{Binding ShowOnOverlay}"/>
+                                            <TextBlock Text="Подсказка зрителям в оверлее (пусто — описание награды)" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding Hint, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                            <TextBlock Text="Использовать действие награды (пусто — свои шаги ниже)" Style="{StaticResource FieldLabel}"/>
+                                            <ComboBox x:Name="RuleRewardBox" Height="38" SelectionChanged="RuleRewardBox_SelectionChanged"/>
+
+                                            <TextBlock Text="Свои шаги (если награда не выбрана)" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox x:Name="RuleSteps" Text="{Binding Steps, UpdateSourceTrigger=PropertyChanged}"
+                                                     AcceptsReturn="True" TextWrapping="NoWrap" MinHeight="90"
+                                                     FontFamily="Consolas" FontSize="13" VerticalScrollBarVisibility="Auto"
+                                                     TextChanged="RuleSteps_TextChanged"/>
+                                            <TextBlock x:Name="RuleStepsInfo" Margin="0,8,0,0" FontSize="12"/>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                                                <Button Content="▶  Проверить действие" Style="{StaticResource PrimaryButton}" Click="TestRule_Click" Margin="0,0,10,0"/>
+                                                <Button Content="Копия" Click="DuplicateRule_Click" Margin="0,0,10,0"/>
+                                                <Button Content="Удалить" Click="DeleteRule_Click"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                                        <StackPanel>
+                                            <TextBlock Text="Валюта и ожидание игры" Style="{StaticResource H2}"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="14"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Базовая валюта (в ней суммы правил)" Style="{StaticResource FieldLabel}"/>
+                                                    <TextBox Text="{Binding BaseCurrency, UpdateSourceTrigger=LostFocus}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="Ждать окно игры после доната (сек)" Style="{StaticResource FieldLabel}"/>
+                                                    <TextBox Text="{Binding FocusWaitSeconds, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                            <TextBlock Text="Курсы: по строке на валюту, например USD=90 (1 USD = 90 в базовой валюте)" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding CurrencyRatesText, UpdateSourceTrigger=PropertyChanged}"
+                                                     AcceptsReturn="True" MinHeight="90" FontFamily="Consolas" VerticalScrollBarVisibility="Auto"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Style="{StaticResource Card}">
+                                        <StackPanel>
+                                            <TextBlock Text="Проверка доната" Style="{StaticResource H2}"/>
+                                            <TextBlock Text="Узнай, какое правило сработает, не дожидаясь настоящего доната" Style="{StaticResource Muted}" Margin="0,2,0,0"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="14"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="14"/>
+                                                    <ColumnDefinition Width="110"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Имя" Style="{StaticResource FieldLabel}"/>
+                                                    <TextBox x:Name="TestUser" Text="Зритель"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="Сумма" Style="{StaticResource FieldLabel}"/>
+                                                    <TextBox x:Name="TestAmount" Text="100"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="4">
+                                                    <TextBlock Text="Валюта" Style="{StaticResource FieldLabel}"/>
+                                                    <TextBox x:Name="TestCurrency" Text="RUB"/>
+                                                </StackPanel>
+                                            </Grid>
+                                            <TextBlock Text="Сообщение" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox x:Name="TestMessage" Text="руль влево"/>
+                                            <TextBlock x:Name="TestResult" Margin="0,10,0,0" FontSize="13"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                                <Button Content="Какое правило сработает?" Click="CheckDonation_Click" Margin="0,0,10,0"/>
+                                                <Button Content="▶  Выполнить как донат" Style="{StaticResource PrimaryButton}" Click="SimulateDonation_Click"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Grid>
+
+                    <!-- ============ НАСТРОЙКИ ============ -->
+                    <Grid x:Name="PageSettings" Margin="30,26,30,20" Visibility="Collapsed">
+                        <Grid.RenderTransform><TranslateTransform/></Grid.RenderTransform>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                            <TextBlock Text="Настройки" Style="{StaticResource H1}"/>
+                            <TextBlock Text="Всё сохраняется автоматически в settings.json рядом с программой" Style="{StaticResource Muted}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <ScrollViewer x:Name="SettingsScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+
+                                <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                                    <StackPanel>
+                                        <TextBlock Text="Twitch" Style="{StaticResource H2}"/>
+                                        <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,0" LineHeight="18"
+                                                   Text="1) Открой консоль Twitch для разработчиков → «Зарегистрировать приложение».  2) В «OAuth Redirect URLs» впиши адрес ниже.  3) Категория «Application Integration».  4) Скопируй Client ID и создай Client Secret."/>
+                                        <TextBlock Text="Client ID" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding Twitch.ClientId, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Text="Client Secret" Style="{StaticResource FieldLabel}"/>
+                                        <PasswordBox x:Name="TwSecret" PasswordChanged="TwSecret_PasswordChanged"/>
+                                        <TextBlock Text="OAuth Redirect URL" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding Twitch.RedirectUri, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                            <Button Content="Открыть консоль Twitch" Click="OpenTwitchConsole_Click" Margin="0,0,10,0"/>
+                                            <Button Content="Выйти из аккаунта Twitch" Click="LogoutTwitch_Click"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                                    <StackPanel>
+                                        <TextBlock Text="DonationAlerts" Style="{StaticResource H2}"/>
+                                        <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,0" LineHeight="18"
+                                                   Text="Нужно только если хочешь управлять игрой донатами. Создай приложение на donationalerts.com → Разработчикам. Redirect URI впиши ровно такой же, как ниже. Права: oauth-user-show и oauth-donation-subscribe."/>
+                                        <TextBlock Text="Client ID" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding Donations.ClientId, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Text="Client Secret" Style="{StaticResource FieldLabel}"/>
+                                        <PasswordBox x:Name="DaSecret" PasswordChanged="DaSecret_PasswordChanged"/>
+                                        <TextBlock Text="Redirect URI" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding Donations.RedirectUri, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                            <Button Content="Открыть настройки приложений DA" Click="OpenDaConsole_Click" Margin="0,0,10,0"/>
+                                            <Button Content="Выйти из DonationAlerts" Click="LogoutDa_Click"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                                    <StackPanel>
+                                        <TextBlock Text="Поведение" Style="{StaticResource H2}"/>
+                                        <TextBlock Text="Часть заголовка окна игры" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding General.GameWindowTitle, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="14"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="14"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Макс. очередь наград" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.MaxQueue, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Длина нажатия (сек)" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.TapSeconds, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="4">
+                                                <TextBlock Text="Файл для OBS (последнее действие)" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.ObsTextFile, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="14"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Пауза между наградами (сек)" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.GapSeconds, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Клавиша «Паника» (Ctrl+Alt+X, F9…; пусто — выкл.)" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.PanicHotkey, UpdateSourceTrigger=LostFocus}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <CheckBox Content="Выполнять действия только когда окно игры в фокусе" IsChecked="{Binding General.RequireGameFocus}" Margin="0,14,0,0"/>
+                                        <CheckBox Content="Отмечать награды выполненными на Twitch" IsChecked="{Binding General.MarkFulfilled}"/>
+                                        <CheckBox Content="Запускать бота сразу при открытии программы" IsChecked="{Binding General.AutoStart}"/>
+                                        <CheckBox Content="Награды на Twitch: создавать при открытии программы и скрывать при закрытии" IsChecked="{Binding General.SyncRewards}"/>
+                                        <CheckBox Content="Сворачивать в трей вместо закрытия" IsChecked="{Binding General.MinimizeToTray}"/>
+                                        <CheckBox Content="Тестовый режим: клавиши НЕ нажимаются, только запись в журнал" IsChecked="{Binding General.DryRun}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                                    <StackPanel>
+                                        <TextBlock Text="Чат и события Twitch" Style="{StaticResource H2}"/>
+                                        <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,0" LineHeight="18"
+                                                   Text="После обновления программа один раз попросит войти в Twitch заново: нужны права на чат, подписки и биты. Сообщения в чат уходят от имени твоего аккаунта. Название награды впиши точно так, как она называется в списке наград; пусто — событие выключено."/>
+                                        <CheckBox Content="Писать в чат, когда награда запускается" IsChecked="{Binding General.ChatAnnounce}" Margin="0,12,0,0"/>
+                                        <CheckBox Content="Отвечать на !награды списком наград с ценами" IsChecked="{Binding General.ChatCommands}"/>
+                                        <TextBlock Text="Награда за новую подписку" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding General.SubReward, UpdateSourceTrigger=LostFocus}"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="14"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Награда за биты" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.BitsReward, UpdateSourceTrigger=LostFocus}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="От скольки битсов" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.BitsMin, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="14"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Награда за рейд" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.RaidReward, UpdateSourceTrigger=LostFocus}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="От скольки зрителей" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.RaidMin, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Style="{StaticResource Muted}" Margin="0,10,0,0" LineHeight="18"
+                                                   Text="Изменения чата и событий вступают в силу после перезапуска бота (Стоп → Старт). Подарочные подписки в этот триггер не входят."/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                                    <StackPanel>
+                                        <TextBlock Text="Рулетка, голосование, копилка, чёрный список" Style="{StaticResource H2}"/>
+                                        <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,0" LineHeight="18"
+                                                   Text="Названия наград впиши точно так, как они называются в списке наград. Пусто — функция выключена. Какие награды участвуют в рулетке и голосовании, выбирается галочкой в самой награде. Цены дорожают и остывают по правилам внизу."/>
+
+                                        <TextBlock Text="Рулетка: название награды" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding General.RouletteReward, UpdateSourceTrigger=LostFocus}"/>
+
+                                        <CheckBox Content="Голосование чата (!1 !2 !3), нужен перезапуск бота" IsChecked="{Binding General.VoteEnabled}" Margin="0,16,0,0"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="14"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Длительность голосования (сек)" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.VoteSeconds, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Само запускать каждые (мин, 0 — только кнопкой)" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.VoteEveryMinutes, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <Button Content="Запустить голосование сейчас" Click="StartVote_Click" HorizontalAlignment="Left" Margin="0,12,0,0"/>
+
+                                        <TextBlock Text="Копилка: название награды-вклада" Style="{StaticResource FieldLabel}" Margin="0,16,0,0"/>
+                                        <TextBox Text="{Binding General.PiggyReward, UpdateSourceTrigger=LostFocus}"/>
+                                        <TextBlock Text="Цель копилки (баллов)" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding General.PiggyGoal, UpdateSourceTrigger=PropertyChanged}" Width="160" HorizontalAlignment="Left"/>
+                                        <TextBlock Text="Что случится, когда копилка собрана" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding General.PiggySteps, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="90"
+                                                 FontFamily="Consolas" FontSize="13" VerticalScrollBarVisibility="Auto"/>
+
+                                        <TextBlock Text="Дорожающие награды: через сколько минут цена падает на один шаг" Style="{StaticResource FieldLabel}" Margin="0,16,0,0"/>
+                                        <TextBox Text="{Binding General.PriceDecayMinutes, UpdateSourceTrigger=PropertyChanged}" Width="160" HorizontalAlignment="Left"/>
+
+                                        <TextBlock Text="Чёрный список (ники через запятую или с новой строки)" Style="{StaticResource FieldLabel}" Margin="0,16,0,0"/>
+                                        <TextBox Text="{Binding General.Blacklist, UpdateSourceTrigger=LostFocus}" AcceptsReturn="True" MinHeight="70" VerticalScrollBarVisibility="Auto"/>
+                                        <TextBlock Style="{StaticResource Muted}" Margin="0,8,0,0" LineHeight="18"
+                                                   Text="Награды таких зрителей отменяются, баллы возвращаются. Донаты и события от них не запускают действий (донат вернуть нельзя)."/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border x:Name="OverlayCard" Style="{StaticResource Card}" Margin="0,0,0,14">
+                                    <StackPanel>
+                                        <TextBlock Text="Оверлей для OBS: подсказки по донатам" Style="{StaticResource H2}"/>
+                                        <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,0" LineHeight="18"
+                                                   Text="В OBS: Источники → ＋ → «Браузер» → вставь ссылку ниже, ширина 700, высота 650. Страница сама листается и обновляется при правке правил. Работает, пока открыта программа (бот запускать не обязательно)."/>
+                                        <CheckBox Content="Оверлей включён" IsChecked="{Binding General.OverlayEnabled}" Margin="0,12,0,0"/>
+                                        <TextBlock Text="Ссылка для OBS" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="OverlayUrl" IsReadOnly="True"/>
+                                        <TextBlock x:Name="OverlayStatus" Margin="0,8,0,0" FontSize="12"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="14"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="14"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Порт" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.OverlayPort, UpdateSourceTrigger=LostFocus}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Правил на странице" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.OverlayRows, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="4">
+                                                <TextBlock Text="Листать каждые (сек)" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Text="{Binding General.OverlaySeconds, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Text="Заголовок" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding General.OverlayTitle, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                            <Button Content="Копировать ссылку" Style="{StaticResource PrimaryButton}" Click="CopyOverlay_Click" Margin="0,0,10,0"/>
+                                            <Button Content="Открыть в браузере" Click="OpenOverlay_Click"/>
+                                        </StackPanel>
+                                        <TextBlock Text="Алерт «кто что запустил» с таймером (OBS: Браузер, 700×220)" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="AlertsUrl" IsReadOnly="True"/>
+                                        <Button Content="Копировать ссылку на алерты" Click="CopyAlerts_Click" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                                        <TextBlock Text="Топ мучителей (OBS: Браузер, 500×450; ?mode=all — за всё время)" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="TopUrl" IsReadOnly="True"/>
+                                        <Button Content="Копировать ссылку на топ" Click="CopyTop_Click" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                                        <TextBlock Text="Голосование чата (OBS: Браузер, 600×300)" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="VoteUrl" IsReadOnly="True"/>
+                                        <Button Content="Копировать ссылку на голосование" Tag="vote" Click="CopyUrl_Click" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                                        <TextBlock Text="Копилка (OBS: Браузер, 600×140)" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="GoalUrl" IsReadOnly="True"/>
+                                        <Button Content="Копировать ссылку на копилку" Tag="goal" Click="CopyUrl_Click" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                                    <StackPanel>
+                                        <TextBlock Text="Клавиши управления" Style="{StaticResource H2}"/>
+                                        <TextBlock Text="Впиши клавиши, которые у тебя назначены в настройках ETS2 (a, w, space, f5, [ …)" Style="{StaticResource Muted}" Margin="0,4,0,8"/>
+                                        <ItemsControl ItemsSource="{Binding Keys}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,3">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="200"/>
+                                                            <ColumnDefinition Width="170"/>
+                                                            <ColumnDefinition Width="110"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding Label}" VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding Name}" Style="{StaticResource Muted}" VerticalAlignment="Center" FontFamily="Consolas"/>
+                                                        <TextBox Grid.Column="2" Text="{Binding Key, UpdateSourceTrigger=LostFocus}" Padding="8,6"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource Card}">
+                                    <StackPanel>
+                                        <TextBlock Text="Сервис" Style="{StaticResource H2}"/>
+                                        <TextBlock x:Name="AdminInfo" Style="{StaticResource Muted}" Margin="0,4,0,0" LineHeight="18"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                            <Button Content="Открыть папку программы" Click="OpenFolder_Click" Margin="0,0,10,0"/>
+                                            <Button x:Name="AdminBtn" Content="Перезапустить от администратора" Click="RestartAdmin_Click"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                            <Button Content="Мастер настройки…" Click="Wizard_Click"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                            <Button Content="Сохранить настройки в файл…" Click="ExportSettings_Click" Margin="0,0,10,0"/>
+                                            <Button Content="Загрузить настройки из файла…" Click="ImportSettings_Click"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                            <Button Content="Отчёт за стрим сейчас" Click="Report_Click" Margin="0,0,10,0"/>
+                                            <Button Content="Папка с отчётами" Click="OpenReports_Click"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!-- ============ ЖУРНАЛ ============ -->
+                    <Grid x:Name="PageLog" Margin="30,26,30,20" Visibility="Collapsed">
+                        <Grid.RenderTransform><TranslateTransform/></Grid.RenderTransform>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="Журнал" Style="{StaticResource H1}"/>
+                                <TextBlock Text="Что происходит прямо сейчас" Style="{StaticResource Muted}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Button Content="Очистить" Click="ClearLog_Click" Margin="0,0,10,0"/>
+                                <Button Content="Открыть файл журнала" Click="OpenLogFile_Click"/>
+                            </StackPanel>
+                        </Grid>
+                        <Border Grid.Row="1" Style="{StaticResource Card}" Padding="10">
+                            <ListBox x:Name="LogList">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                        <Setter Property="Padding" Value="8,4"/>
+                                        <Setter Property="Margin" Value="0"/>
+                                        <Setter Property="Cursor" Value="Arrow"/>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="62"/>
+                                                <ColumnDefinition Width="92"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding TimeText}" Style="{StaticResource Muted}" FontFamily="Consolas"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Source}" Style="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock x:Name="Msg" Grid.Column="2" Text="{Binding Message}" FontSize="12.5"/>
+                                        </Grid>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding Level}" Value="Ok">
+                                                <Setter TargetName="Msg" Property="Foreground" Value="{StaticResource GreenBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Level}" Value="Warn">
+                                                <Setter TargetName="Msg" Property="Foreground" Value="{StaticResource YellowBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Level}" Value="Error">
+                                                <Setter TargetName="Msg" Property="Foreground" Value="{StaticResource RedBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Level}" Value="Action">
+                                                <Setter TargetName="Msg" Property="Foreground" Value="{StaticResource CyanBrush}"/>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                    </Grid>
+
+                    <!-- Всплывающее уведомление -->
+                    <Border x:Name="Toast" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,26"
+                            Background="#262A3A" BorderBrush="#7C5CFF" BorderThickness="1" CornerRadius="10"
+                            Padding="18,11" Opacity="0" IsHitTestVisible="False" MaxWidth="620">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="20" ShadowDepth="4" Opacity="0.5" Color="#000000"/>
+                        </Border.Effect>
+                        <TextBlock x:Name="ToastText" FontSize="13"/>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- ===== Статус-бар ===== -->
+            <Border Grid.Row="2" Background="#0A0B10" BorderBrush="{StaticResource BorderBrush2}" BorderThickness="0,1,0,0">
+                <Grid Margin="16,0">
+                    <TextBlock x:Name="StatusText" Style="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" FontSize="11.5"/>
+                    <TextBlock x:Name="StatusRight" Style="{StaticResource Muted}" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="11.5"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
