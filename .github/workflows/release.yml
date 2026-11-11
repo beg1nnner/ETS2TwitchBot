@@ -2,7 +2,8 @@ name: Сборка и релиз
 
 on:
   push:
-    tags: ['v*']
+    branches: [main]
+    paths-ignore: ['**.md', '**.txt']
   workflow_dispatch:
 
 permissions:
@@ -17,6 +18,13 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+
+      - name: Версия из проекта
+        id: ver
+        shell: pwsh
+        run: |
+          $v = ([xml](Get-Content ETS2TwitchBot.csproj)).Project.PropertyGroup.Version | Select-Object -First 1
+          "v=$v" >> $env:GITHUB_OUTPUT
 
       - name: Сборка (один exe, .NET внутри)
         run: >
@@ -47,9 +55,12 @@ jobs:
           path: dist
 
       - name: Релиз на GitHub
-        if: startsWith(github.ref, 'refs/tags/')
+        if: success() && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.ver.outputs.v }}
+          name: ETS2 Twitch Bot ${{ steps.ver.outputs.v }}
+          target_commitish: ${{ github.sha }}
           files: |
             dist/ETS2_Twitch_Bot_Setup.exe
             dist/README_RU.txt
