@@ -9,7 +9,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>ETS2TwitchBot</AssemblyName>
     <RootNamespace>EtsBot</RootNamespace>
-    <Version>1.5.0</Version>
+    <Version>1.5.1</Version>
     <ApplicationIcon>app.ico</ApplicationIcon>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>

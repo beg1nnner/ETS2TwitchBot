@@ -44,8 +44,16 @@ public sealed class KeySender
         return d;
     }
 
-    public static bool IsKnownKey(string key) => Scan.ContainsKey(key);
-    public static IEnumerable<string> AllKeys => Scan.Keys;
+    // Кнопки мыши тоже можно назначать как «клавиши»: mouse_middle — нажатие колёсика, mouse_left, mouse_right.
+    private static readonly Dictionary<string, (uint Down, uint Up)> Mouse = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["mouse_middle"] = (0x0020, 0x0040),
+        ["mouse_left"] = (0x0002, 0x0004),
+        ["mouse_right"] = (0x0008, 0x0010),
+    };
+
+    public static bool IsKnownKey(string key) => Scan.ContainsKey(key) || Mouse.ContainsKey(key);
+    public static IEnumerable<string> AllKeys => System.Linq.Enumerable.Concat(Scan.Keys, Mouse.Keys);
 
     private const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
     private const uint KEYEVENTF_KEYUP = 0x0002;
@@ -109,6 +117,11 @@ public sealed class KeySender
 
     private void Send(string key, bool up)
     {
+        if (Mouse.TryGetValue(key, out var btn))
+        {
+            SendMouseButton(key, btn, up);
+            return;
+        }
         if (!Scan.TryGetValue(key, out var info))
             throw new ArgumentException($"Неизвестная клавиша '{key}'");
 
@@ -134,6 +147,26 @@ public sealed class KeySender
         };
         if (SendInput(1, new[] { input }, Marshal.SizeOf<INPUT>()) != 1)
             throw new InvalidOperationException("SendInput не отправил событие (если игра запущена от администратора - запусти программу от администратора).");
+    }
+
+    private void SendMouseButton(string key, (uint Down, uint Up) btn, bool up)
+    {
+        lock (_gate)
+        {
+            if (up) _held.Remove(key); else _held.Add(key);
+        }
+        if (DryRun)
+        {
+            Log.Info("Клавиши", $"[тест] {(up ? "отпустить" : "нажать")} {key}");
+            return;
+        }
+        var input = new INPUT
+        {
+            type = INPUT_MOUSE,
+            U = new InputUnion { mi = new MOUSEINPUT { dx = 0, dy = 0, mouseData = 0, dwFlags = up ? btn.Up : btn.Down, time = 0, dwExtraInfo = IntPtr.Zero } }
+        };
+        if (SendInput(1, new[] { input }, Marshal.SizeOf<INPUT>()) != 1)
+            throw new InvalidOperationException("SendInput не отправил событие кнопки мыши.");
     }
 
     /// <summary>Один щелчок колёсика мыши: dir &gt; 0 — вверх, &lt; 0 — вниз.</summary>

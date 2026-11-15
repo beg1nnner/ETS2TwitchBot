@@ -27,6 +27,7 @@ public sealed class ParseResult
 ///   press horn 3 0.25         - нажать 3 раза с паузой 0.25 сек
 ///   press ctrl+t              - сочетание клавиш
 ///   wait 0.5                  - пауза
+///   hold mouse_middle 5       - зажать колёсико мыши (mouse_left / mouse_right - кнопки мыши)
 ///   scroll up 10              - колёсико мыши вверх на 10 щелчков (scroll down - вниз)
 ///   repeat 4 ... end          - повторить блок 4 раза
 /// Всё после # или // - комментарий.

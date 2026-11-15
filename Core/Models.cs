@@ -332,9 +332,12 @@ public sealed class AppSettings : Observable
 /// <summary>Настройки по умолчанию: те же награды, клавиши и правила, что были в Python-версии.</summary>
 public static class Defaults
 {
-    public const int CurrentVersion = 4;
+    public const int CurrentVersion = 5;
     private const string StallPrompt = "Двигатель глохнет и включается ручной тормоз. Стример должен снять ручник и завести двигатель!";
     private const string StallSteps = "press engine\nwait 0.4\npress handbrake";
+    // В ETS2 камера приближается по нажатию колёсика мыши (клавиша «zoom» = mouse_middle), а не по прокрутке.
+    private const string LoupeSteps = "hold zoom 5";
+    private const string OldLoupeSteps = "scroll up 15 0.02\nwait 5\nscroll down 15 0.02";
 
     private static IEnumerable<RewardDef> NewRewardsV2() => new[]
     {
@@ -344,8 +347,7 @@ public static class Defaults
             "hold steer_left 0.15\nhold steer_right 1.2"),
         R("Дёрганый режим", 250, "5 секунд газ-тормоз-газ-тормоз: машина дёргается", "#C0392B", 60,
             "repeat 10\n  hold accelerate 0.25\n  hold brake 0.25\nend"),
-        R("Лупа", 200, "Картинка резко приближается на несколько секунд", "#2980B9", 60,
-            "scroll up 15 0.02\nwait 5\nscroll down 15 0.02"),
+        R("Лупа", 200, "Картинка резко приближается на несколько секунд", "#2980B9", 60, LoupeSteps),
     };
 
     private static IEnumerable<DonationRule> NewRulesV2() => new[]
@@ -413,6 +415,14 @@ public static class Defaults
                 if (!s.Donations.Rules.Any(x => string.Equals(x.Name, rule.Name, StringComparison.OrdinalIgnoreCase)))
                     s.Donations.Rules.Insert(Math.Max(0, s.Donations.Rules.Count - 3), rule);
         }
+        if (s.SettingsVersion < 5)
+        {
+            // клавиша приближения и новая «Лупа» (колёсико мыши нажимается, а не крутится)
+            if (!s.Keys.Any(k => string.Equals(k.Name, "zoom", StringComparison.OrdinalIgnoreCase)))
+                s.Keys.Add(new KeyBinding { Name = "zoom", Label = "Приближение (колёсико мыши)", Key = "mouse_middle" });
+            var loupe = s.FindReward("Лупа");
+            if (loupe != null && loupe.Steps.Replace("\r\n", "\n").Trim() == OldLoupeSteps) loupe.Steps = LoupeSteps;
+        }
         s.SettingsVersion = CurrentVersion;
         return true;
     }
@@ -459,6 +469,7 @@ public static class Defaults
         new KeyBinding { Name = "camera_1", Label = "Камера 1", Key = "1" },
         new KeyBinding { Name = "camera_2", Label = "Камера 2", Key = "2" },
         new KeyBinding { Name = "camera_3", Label = "Камера 3", Key = "3" },
+        new KeyBinding { Name = "zoom", Label = "Приближение (колёсико мыши)", Key = "mouse_middle" },
     };
 
     private static RewardDef R(string title, int cost, string prompt, string color, int cooldown, string steps)

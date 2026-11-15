@@ -83,6 +83,19 @@ public static class SelfTest
                 Defaults.Migrate(old3) && old3.Rewards.Count(x => x.Title.StartsWith("Гудок: ")) == 5
                 && old3.Donations.Rules.Count(x => x.Name.StartsWith("Гудок: ")) == 5);
 
+            // 2в. «Лупа» — нажатие колёсика мыши
+            Check("мышь: mouse_middle — известная клавиша", KeySender.IsKnownKey("mouse_middle") && s.KeyExists("zoom"));
+            var loupeParsed = ActionScript.Parse(s.FindReward("Лупа")!.Steps, s.KeyExists);
+            Check("лупа: hold zoom 5 разбирается", loupeParsed.Ok && loupeParsed.Steps.Count == 1);
+            var old5 = Defaults.Create(); old5.SettingsVersion = 4;
+            old5.Keys.Remove(old5.Keys.First(k => k.Name == "zoom"));
+            old5.FindReward("Лупа")!.Steps = "scroll up 15 0.02\nwait 5\nscroll down 15 0.02";
+            Check("перенос v5: клавиша zoom и новая Лупа", Defaults.Migrate(old5) && old5.KeyExists("zoom") && old5.FindReward("Лупа")!.Steps == "hold zoom 5");
+            var custom5 = Defaults.Create(); custom5.SettingsVersion = 4;
+            custom5.FindReward("Лупа")!.Steps = "scroll up 3";
+            Defaults.Migrate(custom5);
+            Check("перенос v5: свои шаги Лупы не трогаем", custom5.FindReward("Лупа")!.Steps == "scroll up 3");
+
             // 3. клавиши
             Check("клавиши: имя из списка", s.ResolveKey("steer_left") == "a");
             Check("клавиши: просто клавиша", s.KeyExists("f5") && s.KeyExists("space"));

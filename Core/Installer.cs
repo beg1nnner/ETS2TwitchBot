@@ -15,7 +15,7 @@ public static class Installer
 {
     public const string AppName = "ETS2 Twitch Bot";
     public const string ExeName = "ETS2TwitchBot.exe";
-    public const string Version = "1.5.0";
+    public const string Version = "1.5.1";
     private const string UninstKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\ETS2TwitchBot";
 
     public static string DefaultDir => Path.Combine(
